@@ -1,0 +1,188 @@
+%% Name: Neil Advani
+%% Email: neil.advani@vanderbilt.edu
+%% VUnetID: advanin
+%% Class: CS3270
+%% Date: 4/7/16
+%% Honor Statement: "I did not recieve any help"
+
+%% Complete description:  <<Your job to write this>>
+%% Classic 9x9 sudoku solver. Does so by creating a
+%% board of variables, then describing the col row and
+%% box relations, constraining them to be different,
+%% then attempting to assign all other variables with
+%% values of 1-9.
+
+%% use routines from the Constraint Logic Programming over Finite Domains library
+:- use_module(library('clpfd')).
+
+%% see "library clpfd: Constraint Logic Programming over Finite Domains" in
+%% the provided SWI-clpfd.pdf file.
+
+
+%% go is the main entry point. Enter "go." at the Prolog prompt
+%%
+go :-
+	File = 'c:\\cs3270\\prolog\\sudoku.txt',
+	start(File).
+
+
+%% Do not change the following function, as our
+%% testing script depends upon it.
+%% You are free to make functions similar to it for your
+%% own testing purposes.
+%%
+start(File) :-
+	see(File),		% open file
+	write(trying_file(File)),nl,nl,
+	read(Board),
+	seen,                   % close file
+	time(sudoku(Board)),    % call your solver here, passing it the Board (with timer)
+	%sudoku(Board),         % call your solver here, passing it the Board (without timer)
+	pretty_sudo_print(Board),nl.
+
+
+
+
+pretty_sudo_print(Board) :-
+	Board = [R1,R2,R3,R4,R5,R6,R7,R8,R9],
+	nl,nl,
+	printsudorow(R1),
+	printsudorow(R2),
+	printsudorow(R3),
+	write('-------+-------+-------'), nl,
+	printsudorow(R4),
+	printsudorow(R5),
+	printsudorow(R6),
+	write('-------+-------+-------'), nl,
+	printsudorow(R7),
+	printsudorow(R8),
+	printsudorow(R9).
+
+printsudorow(Row) :-
+	Row = [C1,C2,C3,C4,C5,C6,C7,C8,C9],
+	write(' '),
+	write(C1), write(' '),
+	write(C2), write(' '),
+	write(C3), write(' '), write('|'), write(' '),
+	write(C4), write(' '),
+	write(C5), write(' '),
+	write(C6), write(' '), write('|'), write(' '),
+	write(C7), write(' '),
+	write(C8), write(' '),
+	write(C9), write(' '), nl.
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Main driver: sudoku(Board)
+%%
+%% Your job is to write this and any other needed predicates:
+%%
+%% This predicate should contain your rules for solving Sudoku.
+%% If the puzzle can be solved, the unknowns in Board should be
+%% replaced with the answer. If the puzzle cannot be solved,
+%% "No" or "False" should be produced by the Prolog interpreter.
+%%
+
+sudoku(Board) :-
+	%%assign each board val to a variable
+	Board = [[X11,X12,X13,X14,X15,X16,X17,X18,X19],
+		 [X21,X22,X23,X24,X25,X26,X27,X28,X29],
+		 [X31,X32,X33,X34,X35,X36,X37,X38,X39],
+		 [X41,X42,X43,X44,X45,X46,X47,X48,X49],
+	         [X51,X52,X53,X54,X55,X56,X57,X58,X59],
+		 [X61,X62,X63,X64,X65,X66,X67,X68,X69],
+		 [X71,X72,X73,X74,X75,X76,X77,X78,X79],
+		 [X81,X82,X83,X84,X85,X86,X87,X88,X89],
+		 [X91,X92,X93,X94,X95,X96,X97,X98,X99]],
+
+	%create cols rows and boxes accordingly
+	Col1 = [X11,X21,X31,X41,X51,X61,X71,X81,X91],
+	Col2 = [X12,X22,X32,X42,X52,X62,X72,X82,X92],
+	Col3 = [X13,X23,X33,X43,X53,X63,X73,X83,X93],
+	Col4 = [X14,X24,X34,X44,X54,X64,X74,X84,X94],
+	Col5 = [X15,X25,X35,X45,X55,X65,X75,X85,X95],
+	Col6 = [X16,X26,X36,X46,X56,X66,X76,X86,X96],
+	Col7 = [X17,X27,X37,X47,X57,X67,X77,X87,X97],
+	Col8 = [X18,X28,X38,X48,X58,X68,X78,X88,X98],
+	Col9 = [X19,X29,X39,X49,X59,X69,X79,X89,X99],
+
+	Row1 = [X11,X12,X13,X14,X15,X16,X17,X18,X19],
+	Row2 = [X21,X22,X23,X24,X25,X26,X27,X28,X29],
+	Row3 = [X31,X32,X33,X34,X35,X36,X37,X38,X39],
+	Row4 = [X41,X42,X43,X44,X45,X46,X47,X48,X49],
+	Row5 = [X51,X52,X53,X54,X55,X56,X57,X58,X59],
+	Row6 = [X61,X62,X63,X64,X65,X66,X67,X68,X69],
+	Row7 = [X71,X72,X73,X74,X75,X76,X77,X78,X79],
+	Row8 = [X81,X82,X83,X84,X85,X86,X87,X88,X89],
+	Row9 = [X91,X92,X93,X94,X95,X96,X97,X98,X99],
+
+	Box1 = [X11,X12,X13,X21,X22,X23,X31,X32,X33],
+	Box2 = [X14,X15,X16,X24,X25,X26,X34,X35,X36],
+	Box3 = [X17,X18,X19,X27,X28,X29,X37,X38,X39],
+	Box4 = [X41,X42,X43,X51,X52,X53,X61,X62,X63],
+	Box5 = [X44,X45,X46,X54,X55,X56,X64,X65,X66],
+	Box6 = [X47,X48,X49,X57,X58,X59,X67,X68,X69],
+	Box7 = [X71,X72,X73,X81,X82,X83,X91,X92,X93],
+	Box8 = [X74,X75,X76,X84,X85,X86,X94,X95,X96],
+	Box9 = [X77,X78,X79,X87,X88,X89,X97,X98,X99],
+
+	%state each box row and col needs diff nums
+	Col1 ins 1..9,
+	Col2 ins 1..9,
+	Col3 ins 1..9,
+	Col4 ins 1..9,
+	Col5 ins 1..9,
+	Col6 ins 1..9,
+	Col7 ins 1..9,
+	Col8 ins 1..9,
+	Col9 ins 1..9,
+
+	all_different(Box1),
+	all_different(Box2),
+	all_different(Box3),
+	all_different(Box4),
+	all_different(Box5),
+	all_different(Box6),
+	all_different(Box7),
+	all_different(Box8),
+	all_different(Box9),
+
+	all_different(Row1),
+	all_different(Row2),
+	all_different(Row3),
+	all_different(Row4),
+	all_different(Row5),
+	all_different(Row6),
+	all_different(Row7),
+	all_different(Row8),
+	all_different(Row9),
+
+	all_different(Col1),
+	all_different(Col2),
+	all_different(Col3),
+	all_different(Col4),
+	all_different(Col5),
+	all_different(Col6),
+	all_different(Col7),
+	all_different(Col8),
+	all_different(Col9),
+
+	label(Col1),
+	label(Col2),
+	label(Col3),
+	label(Col4),
+	label(Col5),
+	label(Col6),
+	label(Col7),
+	label(Col8),
+	label(Col9),!.
+
+
+	%attempt to label them as 1,2,3,4,5,6,7,8,9
+	%add cut operator to only give first solution found
+	%maplist(permutation([1,2,3,4,5,6,7,8,9]),Board),!.
+
